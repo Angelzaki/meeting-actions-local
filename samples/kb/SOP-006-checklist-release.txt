@@ -1,0 +1,7 @@
+SOP-006 Checklist de release
+
+Antes del congelamiento de código se verifica que las pruebas automatizadas pasen y que los casos de prueba de UAT estén aprobados por el dueño de producto.
+
+El checklist de release incluye pasos de rollback documentados, ventana de despliegue comunicada y alertas de errores configuradas en el monitoreo. Todo despliegue a producción requiere un plan de reversa probado en staging.
+
+Después del release se monitorean las alertas de errores de la pasarela de pagos durante 24 horas.

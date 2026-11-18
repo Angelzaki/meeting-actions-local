@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>meeting-actions-local</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f4f6f9; }
+    textarea { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+    .owner-col { min-width: 280px; max-width: 340px; flex: 0 0 auto; }
+    .board { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .5rem; }
+    .action-card { border-left: 4px solid #6c757d; }
+    .action-card.s-abierta { border-left-color: #f0ad4e; }
+    .action-card.s-en_curso { border-left-color: #0dcaf0; }
+    .action-card.s-hecha { border-left-color: #198754; opacity: .75; }
+    .action-card.s-bloqueada { border-left-color: #dc3545; }
+    .kb-ref { font-size: .75rem; }
+    .snippet { font-size: .75rem; color: #6c757d; }
+    footer { color: #6c757d; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">meeting-actions-local</span>
+    <span class="navbar-text small">Actas → acciones, decisiones y preguntas · 100% local · KB: {{ kb_docs|length }} doc(s)</span>
+  </div>
+</nav>
+
+<main class="container-fluid px-4">
+  <div class="row g-4">
+    <section class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Acta</div>
+        <div class="card-body">
+          <div class="input-group mb-2">
+            <select id="sample" class="form-select">
+              <option value="">Acta de ejemplo…</option>
+              {% for s in samples %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-outline-secondary" id="loadSample" type="button">Cargar</button>
+          </div>
+          <input class="form-control form-control-sm mb-2" type="file" id="file" accept=".md,.txt,text/plain,text/markdown">
+          <input class="form-control form-control-sm mb-2" id="source" placeholder="Nombre de la fuente (opcional)">
+          <textarea id="text" class="form-control mb-2" rows="16" placeholder="Pega aquí las notas de la reunión…"></textarea>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="linkKb" checked {% if not kb_docs %}disabled{% endif %}>
+            <label class="form-check-label" for="linkKb">Enlazar con KB / SOP</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="save" checked>
+            <label class="form-check-label" for="save">Guardar en historial</label>
+          </div>
+          <button class="btn btn-primary w-100" id="analyze" type="button">Extraer acciones</button>
+          <div id="error" class="alert alert-danger mt-3 d-none"></div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mt-4">
+        <div class="card-header fw-semibold">Historial reciente</div>
+        <ul class="list-group list-group-flush small" id="history">
+          {% for r in history %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>#{{ r.id }} · {{ r.title }}</span>
+            <span class="text-muted">{{ r.n_actions }} acc.</span>
+          </li>
+          {% else %}
+          <li class="list-group-item text-muted">Sin corridas todavía.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="col-lg-8">
+      <div id="empty" class="text-muted text-center py-5">Carga un acta y pulsa «Extraer acciones».</div>
+      <div id="results" class="d-none">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h2 class="h4 mb-0" id="title"></h2>
+            <div class="text-muted small" id="meta"></div>
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-dark" id="dlMd" type="button">.md</button>
+            <button class="btn btn-outline-dark" id="dlJson" type="button">.json</button>
+          </div>
+        </div>
+        <div class="row g-2 mb-3" id="stats"></div>
+        <div id="warnings"></div>
+
+        <h3 class="h6 text-uppercase text-muted">Tablero por responsable</h3>
+        <div class="board mb-4" id="board"></div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h3 class="h6 text-uppercase text-muted">Decisiones</h3>
+            <ul class="list-group shadow-sm" id="decisions"></ul>
+          </div>
+          <div class="col-md-6">
+            <h3 class="h6 text-uppercase text-muted">Preguntas abiertas</h3>
+            <ul class="list-group shadow-sm" id="questions"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer class="text-center my-5">Hecho en Lima · Angel Salazar · CIP 404730</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let last = null;
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function download(name, content, mime) {
+  const a = el('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function kbRefs(links) {
+  const wrap = el('div', 'mt-2');
+  (links || []).forEach((l) => {
+    const d = el('div', 'kb-ref');
+    d.append(el('span', 'badge text-bg-secondary me-1', l.citation));
+    d.append(el('span', '', l.title));
+    d.append(el('div', 'snippet', '«' + l.snippet + '»'));
+    wrap.append(d);
+  });
+  return wrap;
+}
+
+function actionCard(a) {
+  const card = el('div', 'card action-card shadow-sm mb-2 s-' + a.status);
+  const body = el('div', 'card-body p-2');
+  body.append(el('div', 'small', a.text));
+  const row = el('div', 'd-flex flex-wrap gap-1 mt-2 align-items-center');
+  const due = el('span', 'badge ' + (a.overdue ? 'text-bg-danger' : 'text-bg-light border'), a.due_date ? a.due_date + (a.overdue ? ' · vencida' : '') : 'sin fecha');
+  row.append(due);
+  row.append(el('span', 'badge text-bg-light border', a.status.replace('_', ' ')));
+  row.append(el('span', 'badge text-bg-light border', 'conf ' + a.confidence.toFixed(2)));
+  if (a.priority) row.append(el('span', 'badge text-bg-warning', a.priority));
+  body.append(row);
+  if (a.links && a.links.length) body.append(kbRefs(a.links));
+  card.append(body);
+  return card;
+}
+
+function render(data) {
+  last = data;
+  $('empty').classList.add('d-none');
+  $('results').classList.remove('d-none');
+  $('title').textContent = data.title;
+  $('meta').textContent = [data.meeting_date, data.source, data.attendees.length ? 'Asistentes: ' + data.attendees.join(', ') : ''].filter(Boolean).join(' · ');
+
+  const s = data.stats;
+  const stats = $('stats');
+  stats.replaceChildren();
+  [['Acciones', s.actions], ['Con responsable', s.assigned], ['Con fecha', s.with_due], ['Decisiones', s.decisions], ['Preguntas', s.questions], ['Con KB', s.linked]].forEach(([k, v]) => {
+    const c = el('div', 'col-4 col-md-2');
+    const box = el('div', 'card text-center shadow-sm');
+    const b = el('div', 'card-body py-2');
+    b.append(el('div', 'h4 mb-0', String(v)), el('div', 'small text-muted', k));
+    box.append(b);
+    c.append(box);
+    stats.append(c);
+  });
+
+  const warn = $('warnings');
+  warn.replaceChildren();
+  data.warnings.forEach((w) => warn.append(el('div', 'alert alert-warning py-1 small', w)));
+
+  const board = $('board');
+  board.replaceChildren();
+  Object.entries(data.board).forEach(([owner, items]) => {
+    const col = el('div', 'owner-col');
+    const head = el('div', 'fw-semibold mb-2', owner + ' ');
+    head.append(el('span', 'badge text-bg-dark', String(items.length)));
+    col.append(head);
+    items.forEach((a) => col.append(actionCard(a)));
+    board.append(col);
+  });
+  if (!Object.keys(data.board).length) board.append(el('div', 'text-muted', 'No se detectaron acciones.'));
+
+  const dec = $('decisions');
+  dec.replaceChildren();
+  data.decisions.forEach((d) => {
+    const li = el('li', 'list-group-item small', d.text);
+    if (d.links && d.links.length) li.append(kbRefs(d.links));
+    dec.append(li);
+  });
+  if (!data.decisions.length) dec.append(el('li', 'list-group-item text-muted small', 'Sin decisiones detectadas.'));
+
+  const qs = $('questions');
+  qs.replaceChildren();
+  data.questions.forEach((q) => {
+    const li = el('li', 'list-group-item small', q.text + (q.owner ? ' (' + q.owner + ')' : ''));
+    if (q.links && q.links.length) li.append(kbRefs(q.links));
+    qs.append(li);
+  });
+  if (!data.questions.length) qs.append(el('li', 'list-group-item text-muted small', 'Sin preguntas abiertas.'));
+}
+
+function showError(msg) {
+  const e = $('error');
+  e.textContent = msg;
+  e.classList.toggle('d-none', !msg);
+}
+
+async function analyze() {
+  showError('');
+  const text = $('text').value.trim();
+  if (!text) return showError('Pega o carga un acta primero.');
+  const btn = $('analyze');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, source: $('source').value.trim() || 'pegado', save: $('save').checked, link_kb: $('linkKb').checked }),
+    });
+    if (!res.ok) throw new Error('Error ' + res.status);
+    render(await res.json());
+    if ($('save').checked) refreshHistory();
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function refreshHistory() {
+  const res = await fetch('/api/history?limit=8');
+  if (!res.ok) return;
+  const data = await res.json();
+  const ul = $('history');
+  ul.replaceChildren();
+  data.runs.forEach((r) => {
+    const li = el('li', 'list-group-item d-flex justify-content-between');
+    li.append(el('span', '', '#' + r.id + ' · ' + r.title), el('span', 'text-muted', r.n_actions + ' acc.'));
+    ul.append(li);
+  });
+}
+
+$('analyze').addEventListener('click', analyze);
+$('loadSample').addEventListener('click', async () => {
+  const name = $('sample').value;
+  if (!name) return;
+  const res = await fetch('/api/samples/' + encodeURIComponent(name) + '/text');
+  if (res.ok) {
+    $('text').value = await res.text();
+    $('source').value = name;
+  }
+});
+$('file').addEventListener('change', (ev) => {
+  const f = ev.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    $('text').value = reader.result;
+    $('source').value = f.name;
+  };
+  reader.readAsText(f, 'utf-8');
+});
+$('dlMd').addEventListener('click', () => last && download('meeting_report.md', last.markdown, 'text/markdown'));
+$('dlJson').addEventListener('click', () => {
+  if (!last) return;
+  const { markdown, ...rest } = last;
+  download('meeting_report.json', JSON.stringify(rest, null, 2), 'application/json');
+});
+</script>
+</body>
+</html>

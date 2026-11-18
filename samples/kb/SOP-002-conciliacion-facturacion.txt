@@ -1,0 +1,7 @@
+SOP-002 Conciliación bancaria y facturación electrónica
+
+La conciliación bancaria se genera cada noche y compara los abonos del banco con los comprobantes emitidos. Las diferencias se clasifican como duplicado, monto distinto o pago sin comprobante.
+
+Cuando se detecta un comprobante duplicado, Finanzas emite la nota de crédito correspondiente y comunica al cliente. Soporte no emite notas de crédito. El endpoint de emisión debe usar una clave de idempotencia por pedido para evitar duplicados por reintentos del webhook.
+
+Un comprobante aceptado por SUNAT solo se anula mediante nota de crédito dentro de los plazos vigentes. Las comisiones del medio de pago no se reembolsan salvo aprobación de Finanzas.

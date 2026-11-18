@@ -1,0 +1,7 @@
+SOP-007 Migración de datos maestros
+
+Antes de migrar el maestro de proveedores se depuran duplicados por RUC y se marcan los proveedores inactivos por más de 3 años. El mapeo del plan contable lo aprueba Contabilidad.
+
+La carga de saldos iniciales se prueba primero en un ambiente de pruebas con una copia de los datos. Se documenta el inventario de reportes personalizados que deberán reconstruirse en el sistema nuevo.
+
+El sistema antiguo pasa a solo lectura en la fecha de corte acordada y se conserva el acceso para consulta de auditoría.

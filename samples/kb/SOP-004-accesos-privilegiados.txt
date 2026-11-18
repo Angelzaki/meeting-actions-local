@@ -1,0 +1,7 @@
+SOP-004 Accesos privilegiados y MFA
+
+Toda cuenta con rol administrador debe tener autenticación multifactor (MFA) activa. Las cuentas sin MFA se suspenden después de 5 días de aviso.
+
+El listado de usuarios con acceso privilegiado se revisa el último día hábil de cada mes. Las excepciones de acceso privilegiado para proveedores externos requieren aprobación escrita de Cumplimiento y vencen a los 90 días.
+
+Las claves de servicio se rotan cada 90 días. La evidencia de la revisión de accesos se conserva para la auditoría externa durante 2 años.

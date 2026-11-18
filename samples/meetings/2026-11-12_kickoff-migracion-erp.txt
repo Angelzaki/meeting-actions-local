@@ -1,0 +1,25 @@
+KICKOFF MIGRACIÓN ERP - Fase 1
+Fecha: 2026-11-12
+Participantes: Patricia Núñez, Renzo Alva, Gabriela Soto, Óscar Medina, Carlos Ruiz
+Tema: alcance y cronograma de la fase 1
+
+Objetivo de la fase 1: migrar maestro de proveedores, plan contable y saldos iniciales del ERP actual.
+
+DECISIONES
+- Decisión: la migración se hace por módulos, empezando por Compras y luego Contabilidad.
+- Decisión: el ERP antiguo queda en solo lectura desde el 15 de enero.
+- Acuerdo: Patricia Núñez es la sponsor y aprueba cambios de alcance.
+
+ACCIONES
+- Renzo Alva - levantar el inventario de reportes personalizados del ERP actual, para el viernes
+- Gabriela: depurar el maestro de proveedores duplicados | fecha límite: fin de mes
+- Óscar se compromete a entregar el mapeo del plan contable en 2 semanas
+- Acción: Validar con el área legal el contrato del proveedor del ERP | responsable: Patricia | fecha: 2026-11-25 | estado: bloqueada
+- Acción: Definir el plan de pruebas de integración con el banco
+- [ ] Carlos Ruiz: preparar el ambiente de pruebas para la carga de saldos iniciales, hasta el 18/11
+- Acción: Crear el canal de comunicación del proyecto (hecho)
+- Necesitamos confirmar el presupuesto de licencias antes de firmar
+
+PREGUNTAS ABIERTAS
+- ¿El proveedor del ERP cobra por el acceso de solo lectura después del 15 de enero?
+- ¿Qué hacemos con los proveedores inactivos desde hace más de 3 años?

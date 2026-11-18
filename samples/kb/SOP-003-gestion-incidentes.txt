@@ -1,0 +1,7 @@
+SOP-003 Gestión de incidentes y post-mortem
+
+Todo incidente se clasifica en P1, P2 o P3 según el impacto en clientes. Un incidente P1 requiere un comunicador designado y actualizaciones cada 30 minutos.
+
+El post-mortem se realiza dentro de los 5 días hábiles posteriores al cierre del incidente. Debe incluir línea de tiempo, causa raíz, acciones correctivas con responsable y fecha, y las preguntas que quedan abiertas.
+
+Las pruebas de regresión asociadas a la causa raíz se agregan al pipeline antes de cerrar el incidente. Las alertas de volumen anormal se revisan cada trimestre.

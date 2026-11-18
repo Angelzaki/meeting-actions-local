@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meeting-actions-local"
+version = "0.1.0"
+description = "Actas de reunion a acciones: decisiones, responsables, fechas y enlaces a SOP, 100% local"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Angel Salazar" }]
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "jinja2>=3.1",
+  "pytest>=8.0",
+  "rich>=13.0",
+  "httpx>=0.27",
+]
+
+[project.scripts]
+meeting-actions = "meeting_actions.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+meeting_actions = ["templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -1,0 +1,7 @@
+SOP-005 Escalamiento y SLA de soporte
+
+Los tickets de seguridad se escalan directamente a nivel 2 y se responden en un máximo de 1 hora. Los tickets de accesos bloqueados tienen un SLA de 4 horas.
+
+El reporte semanal de SLA se envía a la gerencia los lunes. Los tickets con más de 15 días sin respuesta se revisan y se cierran o se escalan con motivo registrado.
+
+La guardia de fin de semana cubre incidentes P1 y P2. Durante feriados la gerencia de operaciones designa al responsable de guardia con 7 días de anticipación.

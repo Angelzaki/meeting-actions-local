@@ -1,0 +1,23 @@
+COMITÉ DE SOPORTE - SEMANA 45
+Fecha: 06/11/2026
+Asistentes: Ana Torres, Luis Benavides, Pamela Rojas, Hugo Cáceres
+Redactó: Pamela Rojas
+
+Se revisó la cola de tickets de la semana: 212 abiertos, 38 fuera de SLA. El mayor volumen viene de
+accesos bloqueados y de consultas de facturación.
+
+Se acordó que los tickets de seguridad se escalan a nivel 2 sin pasar por la cola general.
+Se decidió que el horario de guardia de fin de semana empieza a las 08:00 y no a las 06:00.
+Decisión: los reportes de SLA se envían todos los lunes antes de las 10:00 a la gerencia.
+
+Ana Torres se encargará de actualizar el procedimiento de restablecimiento de contraseñas.
+Luis Benavides deberá enviar el informe de tickets fuera de SLA hasta el 11/11.
+Pamela preparará la plantilla de respuesta para consultas de facturación para el lunes.
+@hugo coordinar con Infraestructura la ventana de mantenimiento del servidor de correo
+Hay que revisar los tickets con más de 15 días sin respuesta
+Acción: Capacitar a los dos analistas nuevos en el uso de la consola de accesos | responsable: Ana | fecha: 20 de noviembre
+Hugo: validar el listado de usuarios con acceso privilegiado hasta fin de mes
+
+Pendiente de definir: quién asume la guardia durante el feriado del 1 de diciembre.
+¿Conviene separar la cola de facturación de la cola de accesos?
+Pregunta: ¿cuál es el plazo máximo para responder un ticket de seguridad?

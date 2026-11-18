@@ -1,0 +1,7 @@
+SOP-001 Respaldo y restauración de bases de datos
+
+Los respaldos completos de producción se ejecutan todas las noches a las 01:00 y se retienen por 30 días. Si el respaldo nocturno falla, el responsable de infraestructura debe reprogramarlo el mismo día y registrar la causa en el ticket de operaciones.
+
+Cada mes se realiza una restauración de prueba en el ambiente de staging para verificar que el respaldo es utilizable. El resultado se registra con fecha, tamaño del respaldo y tiempo de restauración.
+
+Antes de liberar espacio en el volumen de respaldos se debe confirmar que existe una copia fuera de la región. Nunca se eliminan respaldos con menos de 7 días de antigüedad.
